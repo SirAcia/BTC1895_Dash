@@ -36,7 +36,7 @@ fig_corr = px.imshow(
     title="Correlation Matrix"
 )
 
-missing = df.isna().sum().sort_values(ascending=False)
+missing = df.isna().sum().sort_values(ascending=True)
 fig_missing = px.bar(
     x=missing.values,
     y=missing.index,
@@ -48,7 +48,20 @@ fig_missing = px.bar(
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
     html.Hr(),
+
     dbc.Row([
+        dbc.Col(
+            dcc.Graph(id="corr-matrix", figure=fig_corr),
+            width=6
+        ),
+        dbc.Col(
+            dcc.Graph(id="missing-plot", figure=fig_missing),
+            width=6
+        ),
+    ], align="start", className="mb-4"),
+
+    dbc.Row([
+
         dbc.Col([
             html.H4("Explore a single variable"),
             dcc.Dropdown(
@@ -57,16 +70,15 @@ layout = html.Div([
                 value=all_cols[0],
                 clearable=False
             ),
-            dcc.Graph(id="dist-plot")
         ], width=4),
 
-        dbc.Col([
-            html.H4("Key summaries"),
-            dcc.Graph(id="corr-matrix",  figure=fig_corr),
-            dcc.Graph(id="missing-plot", figure=fig_missing)
-        ], width=8),
-    ], align="start")
+        dbc.Col(
+            dcc.Graph(id="dist-plot"),
+            width=8
+        ),
+    ], align="start"),
 ], style={"padding": "1rem"})
+
 
 
 @callback(
