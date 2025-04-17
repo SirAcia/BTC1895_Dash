@@ -1,5 +1,3 @@
-# pages/01_eda.py
-
 import dash
 import dash_bootstrap_components as dbc
 from dash import html, dcc, callback, Output, Input
@@ -9,10 +7,8 @@ from utils.data_loader import load_raw_data
 
 dash.register_page(__name__, path="/eda")
 
-# 1) Load once
 df = load_raw_data()
 
-# 2) Rename columns on the existing DataFrame
 df.rename(columns={
     "Patient_ID":      "Patient ID",
     "Smoking_Status":  "Smoking Status",
@@ -31,24 +27,24 @@ df.rename(columns={
     "Cancer_Status":   "Cancer Status",
 }, inplace=True)
 
-# 3) Identify numeric vs categorical
-numeric_cols     = df.select_dtypes(include="number").columns.tolist()
+numeric_cols     = [c for c in df.select_dtypes(include="number").columns if c != "Patient ID"]
 categorical_cols = df.select_dtypes(include=["category","object"]).columns.tolist()
 all_cols         = numeric_cols + categorical_cols
 
-# 4) Precompute key figures
 fig_corr = px.imshow(
     df[numeric_cols].corr(),
     title="Correlation Matrix"
 )
-fig_pair = px.scatter_matrix(
-    df,
-    dimensions=numeric_cols[:4],
-    color=categorical_cols[0] if categorical_cols else None,
-    title="Pairwise Scatter (first 4 nums)"
+
+missing = df.isna().sum().sort_values(ascending=False)
+fig_missing = px.bar(
+    x=missing.values,
+    y=missing.index,
+    orientation="h",
+    title="Missing Values per Variable",
+    labels={"x": "Number of Missing Values", "y": "Variable"}
 )
 
-# 5) Layout: sidebar + main
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
     html.Hr(),
@@ -66,8 +62,8 @@ layout = html.Div([
 
         dbc.Col([
             html.H4("Key summaries"),
-            dcc.Graph(id="corr-matrix", figure=fig_corr),
-            dcc.Graph(id="pair-matrix", figure=fig_pair)
+            dcc.Graph(id="corr-matrix",  figure=fig_corr),
+            dcc.Graph(id="missing-plot", figure=fig_missing)
         ], width=8),
     ], align="start")
 ], style={"padding": "1rem"})
