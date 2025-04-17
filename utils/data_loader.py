@@ -3,7 +3,7 @@ import pandas as pd
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler
 
-def load_raw_data(path="data/synthetic_cancer_data.csv"):
+def load_raw_data(path="data/raw/synthetic_cancer_data.csv"):
     df = pd.read_csv(path, engine="python")
     # cast the categorical columns exactly as in your NB
     cat_cols = [
