@@ -1,9 +1,12 @@
 import dash
 import dash_bootstrap_components as dbc
 
-app = dash.Dash(__name__,
-                external_stylesheets=[dbc.themes.BOOTSTRAP],
-                pages_folder="pages")
+app = dash.Dash(
+  __name__,
+  external_stylesheets=[dbc.themes.BOOTSTRAP],
+  use_pages=True,
+  pages_folder="pages"
+)
 server = app.server
 
 app.layout = dbc.Container([
