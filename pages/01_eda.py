@@ -78,9 +78,30 @@ layout = html.Div([
     Input("eda-feature", "value")
 )
 def update_dist(col):
-    return px.histogram(
-        df,
-        x=col,
-        nbins=30 if col in numeric_cols else None,
-        title=f"Distribution of {col}"
-    )
+    if col in numeric_cols:
+        # Numeric: histogram, colored by Cancer Status
+        fig = px.histogram(
+            df,
+            x=col,
+            color="Cancer Status",
+            nbins=30,
+            title=f"Distribution of {col} by Cancer Status"
+        )
+    else:
+        # Categorical: compute counts, then bar chart grouped by Cancer Status
+        count_df = (
+            df
+            .groupby([col, "Cancer Status"])
+            .size()
+            .reset_index(name="Count")
+        )
+        fig = px.bar(
+            count_df,
+            x=col,
+            y="Count",
+            color="Cancer Status",
+            barmode="group",
+            title=f"Counts of {col} by Cancer Status"
+        )
+    return fig
+
