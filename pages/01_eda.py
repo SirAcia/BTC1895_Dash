@@ -36,8 +36,7 @@ continuous_palette = px.colors.sequential.Plasma_r
 fig_corr = px.imshow(
     df[numeric_cols].corr(),
     title="Correlation Matrix of Synthetic Data",
-    color_continuous_scale=continuous_palette,
-    text_auto='.2f'
+    color_continuous_scale=continuous_palette
 )
 
 fig_corr.update_traces(
@@ -53,7 +52,8 @@ fig_missing = px.bar(
     y=missing.index,
     orientation="h",
     title="Missing Values per Variable",
-    labels={"x": "Number of Missing Values", "y": "Variable"}
+    labels={"x": "Number of Missing Values", "y": "Variable"},
+    color_discrete_sequence=px.colors.qualitative.Pastel
 )
 
 fig_missing.update_traces(
