@@ -49,13 +49,16 @@ layout = html.Div([
     ),
     html.H3("3D PCA Projection"),
     dcc.Graph(id="pca-cluster-scatter"),
+
+    html.H3("Cluster Feature Means (Scaled)"),
+
     html.P(
         "Below shows the feature distribution across all different clusters. If feature distributions " 
         "differ greatly between clusters, that is an indicator that k-means clustering is a optimal " 
         "method to identify characteristics associated with cancer. Thus far, no cluster shows significant " 
         "differences between one another."
-    ),
-    html.H3("Cluster Feature Means (Scaled)"),
+    ), 
+     
     dcc.Graph(id="cluster-profiles"),
 
 ], style={"padding": "1rem"})
