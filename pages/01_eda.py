@@ -47,18 +47,28 @@ fig_corr.update_traces(
 
 missing = df.isna().sum().sort_values(ascending=True)
 
+missing_df = (
+    missing
+    .reset_index(name="Missing Count")
+    .rename(columns={"index": "Variable"})
+)
+
 fig_missing = px.bar(
-    x=missing.values,
-    y=missing.index,
+    missing_df,
+    x="Missing Count",
+    y="Variable",
     orientation="h",
     title="Missing Values per Variable",
-    labels={"x": "Number of Missing Values", "y": "Variable"},
+     labels={"MissingCount": "Number of Missing Values", "Variable": "Variable"},
     color_discrete_sequence=px.colors.qualitative.Pastel
 )
 
 fig_missing.update_traces(
     hovertemplate="Variable: %{y}<br>Missing: %{x:d}<extra></extra>"
 )
+
+fig_missing.update_layout(showlegend=False)
+
 
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
@@ -70,7 +80,7 @@ layout = html.Div([
         "imaging data (including tumour size, location, and density), and cancer status (presence/absence). "
     ),
         html.P(
-        "Overall, there are no major amounts of missingness or obvious correlation (see graphs below), with the largest amount" 
+        "Overall, there are no major amounts of missingness or obvious correlation (see graphs below), with the largest amount " 
         "of missingness seen in some genomic and biomarker data. Regardless, the highest amount seen is well below a 30% threshold. "
     ),
 
@@ -96,10 +106,14 @@ layout = html.Div([
         dbc.Col([
             html.H4("Explore a single variable"),
             dcc.Dropdown(
-                id="eda-feature",
-                options=[{"label": c, "value": c} for c in all_cols],
-                value=all_cols[0],
-                clearable=False
+            id="eda-feature",
+            options=[
+                {"label": c, "value": c}
+                for c in all_cols
+                if c not in ("Cancer Status", "Patient ID")
+                    ],
+            value=all_cols[0],
+            clearable=False
             ),
         ], width=4),
 
