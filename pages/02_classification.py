@@ -5,6 +5,7 @@ from dash import html, dcc, callback, Output, Input
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+from sklearn.metrics import confusion_matrix
 from utils.data_loader import load_raw_data, preprocess_df, get_train_test
 from utils.model_utils import train_classifiers, get_metrics, get_roc_curve
 
@@ -14,6 +15,25 @@ dash.register_page(__name__, path="/classification")
 # 2) Prepare data & models once
 raw_df = load_raw_data()
 X, y = preprocess_df(raw_df)
+
+X.rename(columns={
+    "Smoking_Status":  "Smoking Status",
+    "Family_History":  "Family History",
+    "TP53_Mutation":   "TP53 Mutation",
+    "BRCA1_Mutation":  "BRCA1 Mutation",
+    "KRAS_Mutation":   "KRAS Mutation",
+    "Total_Mutations": "Total Mutations",
+    "CEA_Level":       "CEA Level",
+    "AFP_Level":       "AFP Level",
+    "WBC_Count":       "WBC Count",
+    "CRP_Level":       "CRP Level",
+    "Tumor_Size":      "Tumor Size",
+    "Tumor_Location":  "Tumor Location",
+    "Tumor_Density":   "Tumor Density",
+}, inplace=True)
+
+y = y.rename("Cancer Status")
+
 X_train, X_test, y_train, y_test = get_train_test(X, y)
 models = train_classifiers(X_train, y_train)
 metrics_df = get_metrics(models, X_test, y_test)
@@ -30,6 +50,7 @@ layout = html.Div([
     html.Div(id="metrics-container", style={"marginTop": "1rem"}),
     dcc.Graph(id="roc-curve", style={"marginTop": "1rem"}),
     dcc.Graph(id="feature-plot", style={"marginTop": "1rem"}),
+    dcc.Graph(id="confusion-matrix", style={"marginTop": "1rem"}),
 ])
 
 # 4) Callback: update metrics table + accuracy line
@@ -144,4 +165,28 @@ def update_feature_plot(model_name):
                        x=0.5, y=0.5, xref="paper", yref="paper", showarrow=False)
     fig.update_xaxes(visible=False)
     fig.update_yaxes(visible=False)
+
+    return fig
+
+@callback(
+    Output("confusion-matrix", "figure"),
+    Input("model-select", "value")
+)
+
+def plot_confusion(model_name):
+    model = models[model_name]
+    y_pred = model.predict(X_test)
+    cm = confusion_matrix(y_test, y_pred)
+    labels = list(model.classes_)
+    fig = px.imshow(
+        cm,
+        x=labels,
+        y=labels,
+        text_auto=True,
+        color_continuous_scale=px.colors.sequential.Plasma_r,
+        labels={"x": "Predicted", "y": "Actual"},
+        title=f"Confusion Matrix: {model_name}"
+        )
+    fig.update_layout(yaxis=dict(autorange="reversed"))
+
     return fig
