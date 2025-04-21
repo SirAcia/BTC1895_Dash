@@ -47,6 +47,18 @@ fig_missing = px.bar(
 
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
+    html.P(
+        "The data utilised in this analysis is comprised of a synthetic dataset of 1000, patient-level observations. "
+        "Data includes 16 variables ranging across different areas including clinical & demographic data "
+        "(including age, sex, smoking status, and family history), genetic data (including TP53, BRCA1, KRAS, and total " 
+        "mutations),  biomarkers and blood test data (including white blood cell count as well as CEA, AFP, and CRP levels), "
+        "imaging data (including tumour size, location, and density), and cancer status (presence/absence). "
+    ),
+        html.P(
+        "Overall, there are no major amounts of missingness or auto-correlation (see graphs below), with the largest amount" 
+        "of missingness seen in soem genomic and biomarker data. Regardless, the highest amount seen is well below a 30% threshold. "
+    ),
+
     html.Hr(),
 
     dbc.Row([
@@ -59,6 +71,10 @@ layout = html.Div([
             width=6
         ),
     ], align="start", className="mb-4"),
+
+    html.P(
+        "Click on a variable to explore it's distrbution below. Generally, all variables largely follow a normal or uniform distribution. " 
+    ),
 
     dbc.Row([
 
@@ -93,8 +109,16 @@ def update_dist(col):
             x=col,
             color="Cancer Status",
             nbins=30,
-            title=f"Distribution of {col} by Cancer Status"
+            title=f"Distribution of {col} by Cancer Status",
+            hover_data={
+                col: ":.2f",              
+                "Cancer Status": True,    
+                "count": ":d"             
+            }
         )
+
+        fig.update_layout(hovermode="x unified")
+
     else:
         # Categorical: compute counts, then bar chart grouped by Cancer Status
         count_df = (
@@ -109,7 +133,15 @@ def update_dist(col):
             y="Count",
             color="Cancer Status",
             barmode="group",
-            title=f"Counts of {col} by Cancer Status"
+            title=f"Counts of {col} by Cancer Status",
+            hover_data={
+                col: False,               
+                "Count": ":d",           
+                "Cancer Status": True    
+            }
         )
+        
+        fig.update_layout(hovermode="closest")
+
     return fig
 
