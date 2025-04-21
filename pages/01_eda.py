@@ -31,7 +31,7 @@ numeric_cols     = [c for c in df.select_dtypes(include="number").columns if c !
 categorical_cols = df.select_dtypes(include=["category","object"]).columns.tolist()
 all_cols         = numeric_cols + categorical_cols
 
-continuous_palette = px.colors.sequential.Pastel
+continuous_palette = px.colors.sequential.Plasma_r
 
 fig_corr = px.imshow(
     df[numeric_cols].corr(),
