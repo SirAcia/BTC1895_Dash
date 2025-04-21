@@ -112,8 +112,8 @@ def update_cluster_views(k):
             labels={"Mean": "Average (scaled)", "Feature": ""},
             hover_data={
                 "Mean":":.2f",
-                "Feature": False,   
-                "Cluster": False   
+                "Feature": True,   
+                "Cluster": True   
             },
             color_discrete_sequence=palette 
         )

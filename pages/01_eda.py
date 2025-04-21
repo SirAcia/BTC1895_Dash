@@ -31,19 +31,36 @@ numeric_cols     = [c for c in df.select_dtypes(include="number").columns if c !
 categorical_cols = df.select_dtypes(include=["category","object"]).columns.tolist()
 all_cols         = numeric_cols + categorical_cols
 
+continuous_palette = px.colors.sequential.Pastel
+
 fig_corr = px.imshow(
     df[numeric_cols].corr(),
-    title="Correlation Matrix of Synthetic Data"
+    title="Correlation Matrix of Synthetic Data",
+    color_continuous_scale=continuous_palette,
+    text_auto='.2f'
+)
+
+fig_corr.update_traces(
+    hovertemplate=
+      "Corr(%{x}, %{y}) = %{z:.2f}" + 
+      "<extra></extra>"   # drop the secondary box
 )
 
 missing = df.isna().sum().sort_values(ascending=True)
+
 fig_missing = px.bar(
     x=missing.values,
     y=missing.index,
     orientation="h",
     title="Missing Values per Variable",
-    labels={"x": "Number of Missing Values", "y": "Variable"}
+    labels={"x": "Number of Missing Values", "y": "Variable"},
+    hover_data={
+      "x": ":d",    
+      "y": False    
+    }
 )
+
+fig_missing.update_traces(hovertemplate=None)
 
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
@@ -124,7 +141,6 @@ def update_dist(col):
         fig.update_layout(hovermode="x unified")
 
     else:
-        # Categorical: compute counts, then bar chart grouped by Cancer Status
         count_df = (
             df
             .groupby([col, "Cancer Status"])
