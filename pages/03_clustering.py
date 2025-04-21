@@ -13,8 +13,7 @@ dash.register_page(__name__, path="/clustering")
 df_raw = load_raw_data()
 X, y = preprocess_df(df_raw)
 
-df_raw.rename(columns={
-    "Patient_ID":      "Patient ID",
+X.rename(columns={
     "Smoking_Status":  "Smoking Status",
     "Family_History":  "Family History",
     "TP53_Mutation":   "TP53 Mutation",
@@ -28,9 +27,9 @@ df_raw.rename(columns={
     "Tumor_Size":      "Tumor Size",
     "Tumor_Location":  "Tumor Location",
     "Tumor_Density":   "Tumor Density",
-    "Cancer_Status":   "Cancer Status",
 }, inplace=True)
 
+y = y.rename("Cancer Status")
 
 layout = html.Div([
     html.H2("K‑Means Clustering Overview"),
@@ -39,8 +38,6 @@ layout = html.Div([
         "This visualization is a 3D approximation of the clustering applied to the data using " 
         "Principal Compoment Analysis (PCA) to view clustering in reduced dimensions, "
         "and the feature means chart summarizes each cluster's average feature values. " 
-        "If feature distrbutions differ greatly between clusters, that is an indicator that " 
-        "k-means clustering is a optimal method to identify characteristics associated with cancer "
 
     ),
     html.Label("Select number of clusters:"),
@@ -52,7 +49,12 @@ layout = html.Div([
     ),
     html.H3("3D PCA Projection"),
     dcc.Graph(id="pca-cluster-scatter"),
-
+    html.P(
+        "Below shows the feature distribution across all different clusters. If feature distributions " 
+        "differ greatly between clusters, that is an indicator that k-means clustering is a optimal " 
+        "method to identify characteristics associated with cancer. Thus far, no cluster shows significant " 
+        "differences between one another."
+    ),
     html.H3("Cluster Feature Means (Scaled)"),
     dcc.Graph(id="cluster-profiles"),
 
@@ -80,6 +82,8 @@ def update_cluster_views(k):
             color="Cluster", symbol="Cancer Status",
             title=f"3D PCA Projection (k={k})"
         )
+
+        fig_pca3d.update_layout(showlegend=False)
 
         df_prof = X.copy()
         df_prof["Cluster"] = labels_str
