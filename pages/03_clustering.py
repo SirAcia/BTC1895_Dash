@@ -80,7 +80,14 @@ def update_cluster_views(k):
         fig_pca3d = px.scatter_3d(
             df_pca, x="PC1", y="PC2", z="PC3",
             color="Cluster", symbol="Cancer Status",
-            title=f"3D PCA Projection (k={k})"
+            title=f"3D PCA Projection (k={k})",
+            hover_data={
+                "PC1":  ":.2f",
+                "PC2":  ":.2f",
+                "PC3":  ":.2f",
+                "Cancer Status": True,   
+                "Cluster": False         
+            }
         )
 
         fig_pca3d.update_layout(showlegend=False)
@@ -96,8 +103,14 @@ def update_cluster_views(k):
             facet_col="Cluster",
             color="Feature",
             title=f"Cluster Feature Means (k={k})",
-            labels={"Mean": "Average (scaled)", "Feature": ""}
+            labels={"Mean": "Average (scaled)", "Feature": ""},
+            hover_data={
+                "Mean":":.2f",
+                "Feature": False,   
+                "Cluster": False   
+            }
         )
+
         fig_prof.update_layout(showlegend=False)
         fig_prof.update_xaxes(tickangle=45)
 
