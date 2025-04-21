@@ -53,14 +53,12 @@ fig_missing = px.bar(
     y=missing.index,
     orientation="h",
     title="Missing Values per Variable",
-    labels={"x": "Number of Missing Values", "y": "Variable"},
-    hover_data={
-      "x": ":d",    
-      "y": False    
-    }
+    labels={"x": "Number of Missing Values", "y": "Variable"}
 )
 
-fig_missing.update_traces(hovertemplate=None)
+fig_missing.update_traces(
+    hovertemplate="Variable: %{y}<br>Missing: %{x:d}<extra></extra>"
+)
 
 layout = html.Div([
     html.H2("EDA: Raw Cancer Data"),
