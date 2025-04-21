@@ -11,15 +11,44 @@ from utils.model_utils import fit_kmeans
 dash.register_page(__name__, path="/clustering")
 
 df_raw = load_raw_data()
+
+df_raw.rename(columns={
+    "Patient_ID":      "Patient ID",
+    "Smoking_Status":  "Smoking Status",
+    "Family_History":  "Family History",
+    "TP53_Mutation":   "TP53 Mutation",
+    "BRCA1_Mutation":  "BRCA1 Mutation",
+    "KRAS_Mutation":   "KRAS Mutation",
+    "Total_Mutations": "Total Mutations",
+    "CEA_Level":       "CEA Level",
+    "AFP_Level":       "AFP Level",
+    "WBC_Count":       "WBC Count",
+    "CRP_Level":       "CRP Level",
+    "Tumor_Size":      "Tumor Size",
+    "Tumor_Location":  "Tumor Location",
+    "Tumor_Density":   "Tumor Density",
+    "Cancer_Status":   "Cancer Status",
+}, inplace=True)
+
 X, y = preprocess_df(df_raw)
 
 layout = html.Div([
     html.H2("K‑Means Clustering Overview"),
+    html.P(
+        "Use this slider to select the number of clusters (k) applied to the cancer data. "
+        "This visualization is a 3D approximation of the clustering applied to the data using " 
+        "Principal Compoment Analysis (PCA) to view clustering in reduced dimensions, "
+        "and the feature means chart summarizes each cluster's average feature values. " 
+        "If feature distrbutions differ greatly between clusters, that is an indicator that " 
+        "k-means clustering is a optimal method to identify characteristics associated with cancer "
+
+    ),
     html.Label("Select number of clusters:"),
     dcc.Slider(
         id="n-clusters",
         min=2, max=10, step=1, value=2,
-        marks={i: str(i) for i in range(2, 11)}
+        marks={i: str(i) for i in range(2, 11)},
+        tooltip={"placement": "bottom"}
     ),
     html.H3("3D PCA Projection"),
     dcc.Graph(id="pca-cluster-scatter"),
@@ -27,11 +56,6 @@ layout = html.Div([
     html.H3("Cluster Feature Means (Scaled)"),
     dcc.Graph(id="cluster-profiles"),
 
-    html.H3("Cluster vs. Cancer Status Confusion Matrix"),
-    dcc.Graph(id="confusion-matrix-cluster"),
-
-    html.H3("Predicted Class vs. True Cancer Status Confusion Matrix"),
-    dcc.Graph(id="confusion-matrix-predicted"),
 ], style={"padding": "1rem"})
 
 
@@ -75,38 +99,7 @@ def update_cluster_views(k):
         fig_prof.update_layout(showlegend=False)
         fig_prof.update_xaxes(tickangle=45)
 
-        all_classes = np.unique(y)
-
-        cm = confusion_matrix(y, labels, labels=all_classes)
-        fig_cm_cluster = px.imshow(
-            cm,
-            x=[f"Pred Cluster {c}" for c in all_classes],
-            y=[f"True {c}" for c in all_classes],
-            text_auto=True,
-            title="Confusion Matrix: Cluster vs Cancer Status"
-        )
-
-        cluster_to_class = {}
-        for c in np.unique(labels):
-            idx = np.where(labels == c)[0]
-            true_labels = y.iloc[idx]
-            if true_labels.empty:
-                cluster_to_class[c] = all_classes[0]  # default class if cluster is empty
-            else:
-                cluster_to_class[c] = true_labels.mode().iat[0]
-
-        y_pred = pd.Series(labels, index=X.index).map(cluster_to_class)
-
-        cm_pred = confusion_matrix(y, y_pred, labels=all_classes)
-        fig_cm_pred = px.imshow(
-            cm_pred,
-            x=[f"Pred Class {cls}" for cls in all_classes],
-            y=[f"True {cls}" for cls in all_classes],
-            text_auto=True,
-            title="Confusion Matrix: Predicted Class vs True Cancer Status"
-        )
-
-        return fig_pca3d, fig_prof, fig_cm_cluster, fig_cm_pred
+        return fig_pca3d, fig_prof
 
     except Exception as e:
         print("Error in callback:", e)
