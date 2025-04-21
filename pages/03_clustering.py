@@ -11,6 +11,7 @@ from utils.model_utils import fit_kmeans
 dash.register_page(__name__, path="/clustering")
 
 df_raw = load_raw_data()
+X, y = preprocess_df(df_raw)
 
 df_raw.rename(columns={
     "Patient_ID":      "Patient ID",
@@ -30,7 +31,6 @@ df_raw.rename(columns={
     "Cancer_Status":   "Cancer Status",
 }, inplace=True)
 
-X, y = preprocess_df(df_raw)
 
 layout = html.Div([
     html.H2("K‑Means Clustering Overview"),
@@ -62,8 +62,6 @@ layout = html.Div([
 @callback(
     Output("pca-cluster-scatter", "figure"),
     Output("cluster-profiles", "figure"),
-    Output("confusion-matrix-cluster", "figure"),
-    Output("confusion-matrix-predicted", "figure"),
     Input("n-clusters", "value")
 )
 def update_cluster_views(k):
