@@ -92,7 +92,9 @@ def update_feature_plot(model_name):
             x="Importance",
             y="Feature",
             orientation="h",
-            title="Feature Importances (Random Forest)"
+            title="Feature Importances (Random Forest)",
+            color="Feature",
+            color_discrete_sequence=px.colors.qualitative.Pastel
         )
         fig.update_layout(yaxis={"categoryorder": "total ascending"})
         return fig
@@ -100,24 +102,40 @@ def update_feature_plot(model_name):
     # XGBoost: number of splits per feature ('weight' importance)
     elif model_name == "XGBoost":
         booster = models[model_name].get_booster()
-        score = booster.get_score(importance_type="weight")
-        # Map feature index keys to column names
-        feat_scores = []
-        for i, feat in enumerate(X.columns):
-            key = f"f{i}"
-            feat_scores.append({
-                "Feature": feat,
-                "Num Splits": score.get(key, 0)
-            })
-        imp_df = pd.DataFrame(feat_scores).sort_values("Num Splits", ascending=False)
-        fig = px.bar(
-            imp_df,
-            x="Num Splits",
-            y="Feature",
-            orientation="h",
-            title="Split Count per Feature (XGBoost)"
+        importance_dict = booster.get_score(importance_type='weight')
+        # Sort features by importance
+        features = list(importance_dict.keys())
+        scores = list(importance_dict.values())
+        sorted_idx = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
+        features = [features[i] for i in sorted_idx]
+        scores = [scores[i] for i in sorted_idx]
+
+        # Custom pastel palette (repeated)
+        colors = (px.colors.qualitative.Pastel * ((len(features) // len(px.colors.qualitative.Pastel)) + 1))[:len(features)]
+
+        # Build a DataFrame for ease
+        imp_df = pd.DataFrame({"Feature": features, "NumSplits": scores})
+
+        # Plot horizontal bar with custom colors
+        fig = go.Figure()
+        fig.add_trace(go.Bar(
+            x=imp_df['NumSplits'][::-1],
+            y=imp_df['Feature'][::-1],
+            orientation='h',
+            marker_color=colors[::-1],
+            text=[f"{s:.1f}" for s in scores[::-1]],
+            textposition='outside',
+        ))
+        fig.update_layout(
+            title="XGBoost Feature Importance",
+            xaxis_title="Importance Score",
+            yaxis_title="Feature",
+            yaxis=dict(categoryorder="array", categoryarray=features[::-1]),
+            showlegend=False,
+            plot_bgcolor='white'
         )
-        fig.update_layout(yaxis={"categoryorder": "total ascending"})
+        fig.update_xaxes(showgrid=False)
+        fig.update_yaxes(showgrid=False)
         return fig
 
     # Placeholder for other models

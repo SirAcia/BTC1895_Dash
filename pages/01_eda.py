@@ -60,6 +60,7 @@ fig_missing = px.bar(
     orientation="h",
     title="Missing Values per Variable",
      labels={"MissingCount": "Number of Missing Values", "Variable": "Variable"},
+    color="Variable",
     color_discrete_sequence=px.colors.qualitative.Pastel
 )
 
