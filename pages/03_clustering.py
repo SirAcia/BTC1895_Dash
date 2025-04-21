@@ -71,6 +71,8 @@ def update_cluster_views(k):
         km, labels = fit_kmeans(X, n_clusters=k)
         labels_str = labels.astype(str)
 
+        palette = px.colors.qualitative.Pastel
+
         pca = PCA(n_components=3, random_state=42)
         pcs = pca.fit_transform(X)
         df_pca = pd.DataFrame(pcs, columns=["PC1", "PC2", "PC3"], index=X.index)
@@ -87,7 +89,8 @@ def update_cluster_views(k):
                 "PC3":  ":.2f",
                 "Cancer Status": True,   
                 "Cluster": False         
-            }
+            },
+            color_discrete_sequence=palette
         )
 
         fig_pca3d.update_layout(showlegend=False)
@@ -108,7 +111,8 @@ def update_cluster_views(k):
                 "Mean":":.2f",
                 "Feature": False,   
                 "Cluster": False   
-            }
+            },
+            color_discrete_sequence=palette 
         )
 
         fig_prof.update_layout(showlegend=False)

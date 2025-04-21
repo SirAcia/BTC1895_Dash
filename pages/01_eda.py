@@ -33,7 +33,7 @@ all_cols         = numeric_cols + categorical_cols
 
 fig_corr = px.imshow(
     df[numeric_cols].corr(),
-    title="Correlation Matrix"
+    title="Correlation Matrix of Synthetic Data"
 )
 
 missing = df.isna().sum().sort_values(ascending=True)
@@ -55,8 +55,8 @@ layout = html.Div([
         "imaging data (including tumour size, location, and density), and cancer status (presence/absence). "
     ),
         html.P(
-        "Overall, there are no major amounts of missingness or auto-correlation (see graphs below), with the largest amount" 
-        "of missingness seen in soem genomic and biomarker data. Regardless, the highest amount seen is well below a 30% threshold. "
+        "Overall, there are no major amounts of missingness or obvious correlation (see graphs below), with the largest amount" 
+        "of missingness seen in some genomic and biomarker data. Regardless, the highest amount seen is well below a 30% threshold. "
     ),
 
     html.Hr(),
@@ -102,6 +102,9 @@ layout = html.Div([
     Input("eda-feature", "value")
 )
 def update_dist(col):
+
+    palette = px.colors.qualitative.Pastel
+    
     if col in numeric_cols:
         # Numeric: histogram, colored by Cancer Status
         fig = px.histogram(
@@ -114,7 +117,8 @@ def update_dist(col):
                 col: ":.2f",              
                 "Cancer Status": True,    
                 "count": ":d"             
-            }
+            },
+            color_discrete_sequence=palette
         )
 
         fig.update_layout(hovermode="x unified")
@@ -138,9 +142,10 @@ def update_dist(col):
                 col: False,               
                 "Count": ":d",           
                 "Cancer Status": True    
-            }
+            },
+            color_discrete_sequence=palette
         )
-        
+
         fig.update_layout(hovermode="closest")
 
     return fig
