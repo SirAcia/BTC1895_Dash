@@ -130,8 +130,7 @@ def update_dist(col):
             title=f"Distribution of {col} by Cancer Status",
             hover_data={
                 col: ":.2f",              
-                "Cancer Status": True,    
-                "count": ":d"             
+                "Cancer Status": True,               
             },
             color_discrete_sequence=palette
         )
@@ -153,8 +152,7 @@ def update_dist(col):
             barmode="group",
             title=f"Counts of {col} by Cancer Status",
             hover_data={
-                col: False,               
-                "Count": ":d",           
+                col: False,                        
                 "Cancer Status": True    
             },
             color_discrete_sequence=palette
