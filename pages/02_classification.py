@@ -1,5 +1,6 @@
-# pages/02_classification.py
+# Classification page
 
+# libraries/imports 
 import dash
 from dash import html, dcc, callback, Output, Input
 import plotly.graph_objects as go
@@ -9,13 +10,16 @@ from sklearn.metrics import confusion_matrix
 from utils.data_loader import load_raw_data, preprocess_df, get_train_test
 from utils.model_utils import train_classifiers, get_metrics, get_roc_curve
 
-# 1) Register this page
+# registering page for directory
 dash.register_page(__name__, path="/classification")
 
-# 2) Prepare data & models once
+# loading data 
 raw_df = load_raw_data()
+
+# processing data 
 X, y = preprocess_df(raw_df)
 
+# renaming columns for readability
 X.rename(columns={
     "Smoking_Status":  "Smoking Status",
     "Family_History":  "Family History",
@@ -34,12 +38,18 @@ X.rename(columns={
 
 y = y.rename("Cancer Status")
 
+# gettign training and testing split
 X_train, X_test, y_train, y_test = get_train_test(X, y)
+
+# building models (once in the back end) 
 models = train_classifiers(X_train, y_train)
+
+# getting model metrics
 metrics_df = get_metrics(models, X_test, y_test)
 
-# 3) Page layout: dropdown, metrics table, ROC curve, feature/importance plots
+# page layout
 layout = html.Div([
+    # main header/summary 
     html.H2("Classification Performance"),
     html.P(
         "Classification analysis involved 3 different modelling approaches: Logistic Regression, Extreme Gradient Boosting (XGBoost), " 
@@ -47,6 +57,8 @@ layout = html.Div([
         "showed similar, poor, performance. As seen by the similar accuracies and ROC curves, the " 
         "performance of classification models does not differ greatly between the different approaches. "
     ),
+
+    # dropdown menu for each model
      html.P(
         "Choose a modelling approach to examine. " 
     ),
@@ -56,16 +68,22 @@ layout = html.Div([
         value=list(models.keys())[0],
         clearable=False
     ),
+
+    # model metrics & accuracy 
     html.P(
         "When optimized, this modelling approach has the followng accuracy and respective hyperparameters: "
     ),
     html.Div(id="metrics-container", style={"marginTop": "1rem"}),
     dcc.Graph(id="roc-curve", style={"marginTop": "1rem"}),
+
+    # confusion matrix to see overall predictice power 
     html.H3("Predictive Accuracy of Model"),
     html.P(
         "The accuracy and predictive power of model is shown below with a confusion matrix."
     ),
     dcc.Graph(id="confusion-matrix", style={"marginTop": "1rem"}),
+
+    # feature deep dive for random forest and XGB
     html.H3("Feature Insights for Classification Models"),
     html.P(
         "A secondary analysis was conducted to examine the relative importance of each feature within the dataset for cancer classification. " 
@@ -74,26 +92,28 @@ layout = html.Div([
     dcc.Graph(id="feature-plot", style={"marginTop": "1rem"}),
 ])
 
-# 4) Callback: update metrics table + accuracy line
+# callback fopr updating metrics 
 @callback(
     Output("metrics-container", "children"),
     Input("model-select", "value")
 )
+# function for metric update
 def update_metrics_display(model_name):
-    # Extract metrics for selected model
+    # getting metrics for specific model
     row = metrics_df.loc[model_name]
+    # formatting names
     display_names = {
         "accuracy": "Accuracy",
         "precision": "Precision",
         "recall": "Recall",
         "AUC": "AUC"
     }
-    # Accuracy line
+    # getting accuracy + rounding
     accuracy_line = html.P(
         f"Accuracy: {row['accuracy']:.3f}",
         style={"fontWeight": "bold"}
     )
-    # Metrics table
+    # forming table for all metrics
     table_header = html.Thead(html.Tr([html.Th("Metric"), html.Th("Value")]))
     table_rows = []
     for metric, value in row.items():
@@ -103,11 +123,12 @@ def update_metrics_display(model_name):
     table = html.Table([table_header, table_body], style={"borderCollapse": "collapse", "width": "50%"})
     return [accuracy_line, table]
 
-# 5) Callback: update ROC curve
+# callback for ROC curve update
 @callback(
     Output("roc-curve", "figure"),
     Input("model-select", "value")
 )
+# function for plotting ROC update
 def plot_roc_curve(model_name):
     fpr, tpr, auc_val = get_roc_curve(models[model_name], X_test, y_test)
     fig = go.Figure()
@@ -116,13 +137,14 @@ def plot_roc_curve(model_name):
     fig.update_layout(title=f"ROC Curve: {model_name}", xaxis_title="False Positive Rate", yaxis_title="True Positive Rate")
     return fig
 
-# 6) Callback: update feature importance / split count plot
+# callback for feature plot update
 @callback(
     Output("feature-plot", "figure"),
     Input("model-select", "value")
 )
+# function for mapping feature importance for XGB OR random forest feature (# of splits)
 def update_feature_plot(model_name):
-    # Random Forest feature importances
+    # Plot for random forest
     if model_name == "RandomForest":
         importances = models[model_name].feature_importances_
         imp_df = pd.DataFrame({
@@ -141,24 +163,24 @@ def update_feature_plot(model_name):
         fig.update_layout(yaxis={"categoryorder": "total ascending"})
         return fig
 
-    # XGBoost: number of splits per feature ('weight' importance)
+    # Plot for XGB AKA number of splits per feature ('weight' importance)
     elif model_name == "XGBoost":
         booster = models[model_name].get_booster()
         importance_dict = booster.get_score(importance_type='weight')
-        # Sort features by importance
+        # sorting by importance 
         features = list(importance_dict.keys())
         scores = list(importance_dict.values())
         sorted_idx = sorted(range(len(scores)), key=lambda i: scores[i], reverse=True)
         features = [features[i] for i in sorted_idx]
         scores = [scores[i] for i in sorted_idx]
 
-        # Custom pastel palette (repeated)
+        # deining colors from Plotly pastel palette 
         colors = (px.colors.qualitative.Pastel * ((len(features) // len(px.colors.qualitative.Pastel)) + 1))[:len(features)]
 
-        # Build a DataFrame for ease
+        # building df for plotting
         imp_df = pd.DataFrame({"Feature": features, "NumSplits": scores})
 
-        # Plot horizontal bar with custom colors
+        # bar chart for feature splits 
         fig = go.Figure()
         fig.add_trace(go.Bar(
             x=imp_df['NumSplits'][::-1],
@@ -168,6 +190,7 @@ def update_feature_plot(model_name):
             text=[f"{s:.1f}" for s in scores[::-1]],
             textposition='outside',
         ))
+        # formatting XGB graph 
         fig.update_layout(
             title="XGBoost Feature Importance",
             xaxis_title="Importance Score",
@@ -180,7 +203,7 @@ def update_feature_plot(model_name):
         fig.update_yaxes(showgrid=False)
         return fig
 
-    # Placeholder for other models
+    # creating placeholder for logistic regression 
     fig = go.Figure()
     fig.add_annotation(text="Feature insights only available for RandomForest & XGBoost",
                        x=0.5, y=0.5, xref="paper", yref="paper", showarrow=False)
@@ -189,17 +212,18 @@ def update_feature_plot(model_name):
 
     return fig
 
+# confusion matrix callback
 @callback(
     Output("confusion-matrix", "figure"),
     Input("model-select", "value")
 )
-
+# function for confusion matrix 
 def plot_confusion(model_name):
     model = models[model_name]
     y_pred = model.predict(X_test)
     cm = confusion_matrix(y_test, y_pred)
-    class_names = ["Cancer Absent (0)", "Cancer Present (1)"]
-
+    class_names = ["Cancer Absent (0)", "Cancer Present (1)"] # formatting names 
+    # creating matrix 
     fig = px.imshow(
         cm,
         text_auto=True,
@@ -207,6 +231,7 @@ def plot_confusion(model_name):
         labels={"x": "Predicted", "y": "Actual"},
         title=f"Confusion Matrix: {model_name}"
         )
+    # formatting layout
     fig.update_layout(
          xaxis=dict(
             tickmode="array",

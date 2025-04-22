@@ -1,3 +1,6 @@
+# Clustering page
+
+# libraries/imports 
 import dash
 from dash import html, dcc, callback, Output, Input
 import plotly.express as px
@@ -8,11 +11,16 @@ from sklearn.metrics import confusion_matrix
 from utils.data_loader import load_raw_data, preprocess_df
 from utils.model_utils import fit_kmeans
 
+# registering page for directory
 dash.register_page(__name__, path="/clustering")
 
+# loading data 
 df_raw = load_raw_data()
+
+# processing data 
 X, y = preprocess_df(df_raw)
 
+# renaming columns for readability
 X.rename(columns={
     "Smoking_Status":  "Smoking Status",
     "Family_History":  "Family History",
@@ -31,15 +39,18 @@ X.rename(columns={
 
 y = y.rename("Cancer Status")
 
+# defining page layout
 layout = html.Div([
+    # first portion/intro
     html.H2("K‑Means Clustering Overview"),
     html.P(
         "Use this slider to select the number of clusters (k) applied to the cancer data. "
         "This visualization is a 3D approximation of the clustering applied to the data using " 
         "Principal Compoment Analysis (PCA) to view clustering in reduced dimensions, "
         "and the feature means chart summarizes each cluster's average feature values. " 
-
     ),
+
+    # slider for clusters + clusters 
     html.Label("Select number of clusters:"),
     dcc.Slider(
         id="n-clusters",
@@ -50,38 +61,42 @@ layout = html.Div([
     html.H3("3D PCA Projection"),
     dcc.Graph(id="pca-cluster-scatter"),
 
+    # cluster comparison portion
     html.H3("Cluster Feature Means (Scaled)"),
-
     html.P(
         "Below shows the feature distribution across all different clusters. If feature distributions " 
         "differ greatly between clusters, that is an indicator that k-means clustering is a optimal " 
         "method to identify characteristics associated with cancer. Thus far, no cluster shows significant " 
         "differences between one another."
     ), 
-     
     dcc.Graph(id="cluster-profiles"),
 
 ], style={"padding": "1rem"})
 
-
+# callback for detailed cluster representation + graphs
 @callback(
     Output("pca-cluster-scatter", "figure"),
     Output("cluster-profiles", "figure"),
     Input("n-clusters", "value")
 )
+# function for 3D visualization of clustering + graphs
 def update_cluster_views(k):
     try:
+        # fits k means with data 
         km, labels = fit_kmeans(X, n_clusters=k)
         labels_str = labels.astype(str)
 
+        # defining color palette 
         palette = px.colors.qualitative.Pastel
 
+        # defining 3D PCA for visualization
         pca = PCA(n_components=3, random_state=42)
         pcs = pca.fit_transform(X)
         df_pca = pd.DataFrame(pcs, columns=["PC1", "PC2", "PC3"], index=X.index)
         df_pca["Cluster"] = labels_str
         df_pca["Cancer Status"] = y.astype(str)
 
+        # creating 3D scatter plot for approx. visualization
         fig_pca3d = px.scatter_3d(
             df_pca, x="PC1", y="PC2", z="PC3",
             color="Cluster", symbol="Cancer Status",
@@ -93,16 +108,21 @@ def update_cluster_views(k):
                 "Cancer Status": True,   
                 "Cluster": False         
             },
-            color_discrete_sequence=palette
+            color_discrete_sequence=palette # color is pastel (from custom palette)
         )
 
+        # removing legend
         fig_pca3d.update_layout(showlegend=False)
 
+        # making copy of data for clustering 
         df_prof = X.copy()
+
+        # getting average number of points for each variable per cluster 
         df_prof["Cluster"] = labels_str
         means = df_prof.groupby("Cluster").mean().reset_index()
         df_melt2 = means.melt(id_vars="Cluster", var_name="Feature", value_name="Mean")
 
+        # creating bar chart for feature distribution
         fig_prof = px.bar(
             df_melt2,
             x="Feature", y="Mean",
@@ -115,7 +135,7 @@ def update_cluster_views(k):
                 "Feature": True,   
                 "Cluster": True   
             },
-            color_discrete_sequence=palette 
+            color_discrete_sequence=palette # color is pastel (from custom palette)
         )
 
         fig_prof.update_layout(showlegend=False)
