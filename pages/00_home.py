@@ -9,12 +9,16 @@ layout = html.Div([
         "This interactive dashboard explores the use of machine learning (ML) models to classifying/clustering patients " 
         "based on a synthetic cancer dataset of 1,000 individuals. The dataset includes a range of clinical & demographic data, " 
         "genetic data, biomarker & blood test data, and imaging features relevant for cancer diagnosis."),
-    html.Label("Project Aims & Workflow"), 
+
+    html.H2("Project Aims & Workflow"), 
+
     html.P(
         "The aim of the project was two-fold, identifying supervised modelling approaches to predict cancer status in patients as well as "
         "unsupervised approaches to understand prominent features through clustering techniques. Data cleaning involved the removal of negative values, "
         "and categorization of variables. Imputation and scaling varied between modelling approaches. "),
-    html.Label("Results & Next Steps"), 
+
+    html.H3("Results & Next Steps"), 
+
     html.P(
         "Three classification models - Logistic, Random Forest, Extreme Gradient Boost (XBG) - were trained to detect the presence of cancer,"
         "while a K-Means clustering model was employed to explore any potential naturally-occuring groupings within the data."),
