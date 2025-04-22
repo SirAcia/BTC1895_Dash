@@ -12,7 +12,7 @@ server = app.server
 app.layout = dbc.Container([
     dbc.NavbarSimple(
         children=[
-            dbc.NavLink("Home", href="/", active="exact"),
+            dbc.NavLink("Summary", href="/", active="exact"),
             dbc.NavLink("EDA", href="/eda", active="exact"),
             dbc.NavLink("Classification Modelling", href="/classification", active="exact"),
             dbc.NavLink("Clustering Modelling", href="/clustering", active="exact"),
