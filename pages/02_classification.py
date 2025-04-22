@@ -66,7 +66,7 @@ layout = html.Div([
         "The accuracy and predictive power of model is shown below with a confusion matrix."
     ),
     dcc.Graph(id="confusion-matrix", style={"marginTop": "1rem"}),
-    html.H4("Feature Insights for Classification Models"),
+    html.H3("Feature Insights for Classification Models"),
     html.P(
         "A secondary analysis was conducted to examine the relative importance of each feature within the dataset for cancer classification. " 
         "These variables which appear to have the strongest influence on classification may highlight areas for further analysis. "

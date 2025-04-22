@@ -4,13 +4,13 @@ from dash import html
 dash.register_page(__name__, path="/")
 
 layout = html.Div([
-    html.H1("Summary of Analysis & Findings"),
+    html.H2("Summary of Analysis & Findings"),
     html.P(
         "This interactive dashboard explores the use of machine learning (ML) models to classifying/clustering patients " 
         "based on a synthetic cancer dataset of 1,000 individuals. The dataset includes a range of clinical & demographic data, " 
         "genetic data, biomarker & blood test data, and imaging features relevant for cancer diagnosis."),
 
-    html.H2("Project Aims & Workflow"), 
+    html.H3("Project Aims & Workflow"), 
 
     html.P(
         "The aim of the project was two-fold, identifying supervised modelling approaches to predict cancer status in patients as well as "
