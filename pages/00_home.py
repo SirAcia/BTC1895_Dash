@@ -1,15 +1,22 @@
+# home page dash 
+
+# libraries
 import dash
 from dash import html
 
+# registering page for directory
 dash.register_page(__name__, path="/")
 
+# page layout 
 layout = html.Div([
+    # main header
     html.H2("Summary of Analysis & Findings"),
     html.P(
         "This interactive dashboard explores the use of machine learning (ML) models to classifying/clustering patients " 
         "based on a synthetic cancer dataset of 1,000 individuals. The dataset includes a range of clinical & demographic data, " 
         "genetic data, biomarker & blood test data, and imaging features relevant for cancer diagnosis."),
 
+    # secondary header 
     html.H3("Project Aims & Workflow"), 
 
     html.P(
@@ -17,6 +24,7 @@ layout = html.Div([
         "unsupervised approaches to understand prominent features through clustering techniques. Data cleaning involved the removal of negative values, "
         "and categorization of variables. Imputation and scaling varied between modelling approaches. "),
 
+    # secondary header
     html.H3("Results & Next Steps"), 
 
     html.P(
