@@ -42,7 +42,7 @@ metrics_df = get_metrics(models, X_test, y_test)
 layout = html.Div([
     html.H2("Classification Performance"),
     html.P(
-        "Classification analysis involved 3 different modelling approaches: Logistic Regression, Extreme Gradient Boosting (XGB), " 
+        "Classification analysis involved 3 different modelling approaches: Logistic Regression, Extreme Gradient Boosting (XGBoost), " 
         "and Random Forest. The results of each of these approaches are detailed below. Generally, all 3 classification models " 
         "showed similar, poor, performance. As seen by the similar accuracies and ROC curves, the " 
         "performance of classification models does not differ greatly between the different approaches. "

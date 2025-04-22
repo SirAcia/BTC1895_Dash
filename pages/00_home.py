@@ -20,7 +20,7 @@ layout = html.Div([
     html.H3("Results & Next Steps"), 
 
     html.P(
-        "Three classification models - Logistic, Random Forest, Extreme Gradient Boost (XBG) - were trained to detect the presence of cancer,"
+        "Three classification models - Logistic, Random Forest, Extreme Gradient Boost (XGBoost) - were trained to detect the presence of cancer,"
         "while a K-Means clustering model was employed to explore any potential naturally-occuring groupings within the data."),
     html.P(
         "All 3 classification models showed similar levels of poor performance, being unable to effectively separate cancer from non-cancer cases on test data, "
