@@ -4,7 +4,7 @@ from dash import html
 dash.register_page(__name__, path="/")
 
 layout = html.Div([
-    html.H1("Cancer Classification and Clustering Analysis"),
+    html.H1("Summary of Analysis & Findings"),
     html.P(
         "This interactive dashboard explores the use of machine learning (ML) models to classifying/clustering patients " 
         "based on a synthetic cancer dataset of 1,000 individuals. The dataset includes a range of clinical & demographic data, " 
