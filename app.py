@@ -12,12 +12,15 @@ server = app.server
 app.layout = dbc.Container([
     dbc.NavbarSimple(
         children=[
+            dbc.NavLink("Home", href="/", active="exact"),
             dbc.NavLink("EDA", href="/eda", active="exact"),
-            dbc.NavLink("Classification", href="/classification", active="exact"),
-            dbc.NavLink("Clustering", href="/clustering", active="exact"),
+            dbc.NavLink("Classification Modelling", href="/classification", active="exact"),
+            dbc.NavLink("Clustering Modelling", href="/clustering", active="exact"),
         ],
-        brand="Cancer-Dash",
-        color="primary", dark=True
+        brand="Cancer Classification & Clustering",
+        brand_href="/",
+        style={"backgroundColor": "#2A9D8F"}, 
+        dark=True
     ),
     dash.page_container
 ], fluid=True)
