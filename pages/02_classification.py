@@ -41,16 +41,37 @@ metrics_df = get_metrics(models, X_test, y_test)
 # 3) Page layout: dropdown, metrics table, ROC curve, feature/importance plots
 layout = html.Div([
     html.H2("Classification Performance"),
+    html.P(
+        "Classification analysis involved 3 different modelling approaches: Logistic Regression, Extreme Gradient Boosting (XGB), " 
+        "and Random Forest. The results of each of these approaches are detailed below. Generally, all 3 classification models " 
+        "showed similar, poor, performance. As seen by the similar accuracies and ROC curves, the " 
+        "performance of classification models does not differ greatly between the different approaches. "
+    ),
+     html.P(
+        "Choose a modelling approach to examine. " 
+    ),
     dcc.Dropdown(
         id="model-select",
         options=[{"label": name, "value": name} for name in models.keys()],
         value=list(models.keys())[0],
         clearable=False
     ),
+    html.P(
+        "When optimized, this modelling approach has the followng accuracy and respective hyperparameters: "
+    ),
     html.Div(id="metrics-container", style={"marginTop": "1rem"}),
     dcc.Graph(id="roc-curve", style={"marginTop": "1rem"}),
-    dcc.Graph(id="feature-plot", style={"marginTop": "1rem"}),
+    html.P("Predictive Accuracy of Model"),
+    html.P(
+        "The accuracy and predictive power of model is shown below with a confusion matrix."
+    ),
     dcc.Graph(id="confusion-matrix", style={"marginTop": "1rem"}),
+    html.P("Feature Insights for Classification Models"),
+    html.P(
+        "A secondary analysis was conducted to examine the relative importance of each feature within the dataset for cancer classification. " 
+        "These variables which appear to have the strongest influence on classification may highlight areas for further analysis. "
+        ),
+    dcc.Graph(id="feature-plot", style={"marginTop": "1rem"}),
 ])
 
 # 4) Callback: update metrics table + accuracy line
@@ -177,16 +198,27 @@ def plot_confusion(model_name):
     model = models[model_name]
     y_pred = model.predict(X_test)
     cm = confusion_matrix(y_test, y_pred)
-    labels = list(model.classes_)
+    class_names = ["Cancer Absent (0)", "Cancer Present (1)"]
+
     fig = px.imshow(
         cm,
-        x=labels,
-        y=labels,
         text_auto=True,
         color_continuous_scale=px.colors.sequential.Plasma_r,
         labels={"x": "Predicted", "y": "Actual"},
         title=f"Confusion Matrix: {model_name}"
         )
-    fig.update_layout(yaxis=dict(autorange="reversed"))
+    fig.update_layout(
+         xaxis=dict(
+            tickmode="array",
+            tickvals=[0, 1],
+            ticktext=class_names
+        ),
+        yaxis=dict(
+            tickmode="array",
+            tickvals=[0, 1],
+            ticktext=class_names,
+            autorange="reversed"
+        )
+    )
 
     return fig
